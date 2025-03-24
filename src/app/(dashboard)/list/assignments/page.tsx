@@ -154,12 +154,18 @@ const AssignmentListPage = async ({
               (role === "teacher" && (
                 <FormModal table="assignment" type="create" />
               ))}
+            {role === "admin" ||
+              (role === "teacher" && (
+                <FormModal table="assignment" type="create" />
+              ))}
           </div>
         </div>
       </div>
       {/* LIST */}
       <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table columns={columns} renderRow={renderRow} data={data} />
       {/* PAGINATION */}
+      <Pagination page={p} count={count} />
       <Pagination page={p} count={count} />
     </div>
   );

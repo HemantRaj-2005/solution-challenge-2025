@@ -35,10 +35,14 @@ const columns = [
     accessor: "date",
     className: "hidden md:table-cell",
   },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
+  ...(role === "admin" || role === "teacher"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
 ];
 
 const renderRow = (item: ExamList) => (
@@ -149,7 +153,9 @@ const ExamListPage = async ({
       </div>
       {/* LIST */}
       <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table columns={columns} renderRow={renderRow} data={data} />
       {/* PAGINATION */}
+      <Pagination page={p} count={count} />
       <Pagination page={p} count={count} />
     </div>
   );

@@ -8,7 +8,10 @@ import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import { Class, Prisma, Student, Teacher } from "@prisma/client";
 
+// Type definition for class data with associated supervisor
 type ClassList = Class & { supervisor: Teacher };
+
+// Table column definitions
 const columns = [
   {
     header: "Class Name",
@@ -35,6 +38,7 @@ const columns = [
   },
 ];
 
+// Function to render each row in the table
 const renderRow = (item: ClassList) => (
   <tr
     key={item.id}
@@ -48,6 +52,7 @@ const renderRow = (item: ClassList) => (
       <div className="flex items-center gap-2">
         {role === "admin" && (
           <>
+            {/* Update and Delete modals for admin */}
             <FormModal table="class" type="update" data={item} />
             <FormModal table="class" type="delete" id={item.id} />
           </>
@@ -57,6 +62,7 @@ const renderRow = (item: ClassList) => (
   </tr>
 );
 
+// Main page component for displaying the class list
 const ClassListPage = async ({
   searchParams,
 }: {
@@ -64,10 +70,10 @@ const ClassListPage = async ({
 }) => {
   const { page, ...queryParams } = searchParams;
 
+  // Determine current page number from search parameters
   const p = page ? parseInt(page) : 1;
 
-  //URL params
-
+  // URL query parameters for filtering classes
   const query: Prisma.ClassWhereInput = {};
 
   if (queryParams) {
@@ -75,9 +81,11 @@ const ClassListPage = async ({
       if (value !== undefined) {
         switch (key) {
           case "supervisorId":
+            // Filter by supervisor ID
             query.supervisorId = value;
             break;
           case "search":
+            // Search query for filtering classes by name (case-insensitive)
             query.name = { contains: value, mode: "insensitive" };
             break;
           default:
@@ -87,40 +95,45 @@ const ClassListPage = async ({
     }
   }
 
+  // Fetch classes and count using Prisma transactions
   const [data, count] = await prisma.$transaction([
     prisma.class.findMany({
       where: query,
       include: {
-        students: true,
+        students: true, // Include associated students
       },
-      take: ITEMS_PER_PAGE,
-      skip: ITEMS_PER_PAGE * (p - 1),
+      take: ITEMS_PER_PAGE, // Pagination limit
+      skip: ITEMS_PER_PAGE * (p - 1), // Offset based on current page
     }),
-    prisma.class.count({ where: query }),  
+    prisma.class.count({ where: query }), // Get total count for pagination
   ]);
-
 
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      {/* TOP */}
+      {/* TOP SECTION */}
       <div className="flex items-center justify-between">
         <h1 className="hidden md:block text-lg font-semibold">All Classes</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+          {/* Search Input */}
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
+            {/* Filter & Sort Buttons */}
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
+            {/* Add Class Modal (Only for Admin) */}
             {role === "admin" && <FormModal table="class" type="create" />}
           </div>
         </div>
       </div>
-      {/* LIST */}
+
+      {/* TABLE LIST */}
       <Table columns={columns} renderRow={renderRow} data={data} />
-      {/* PAGINATION */}
+
+      {/* PAGINATION COMPONENT */}
       <Pagination page={p} count={count} />
     </div>
   );
