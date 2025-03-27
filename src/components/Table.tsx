@@ -1,3 +1,4 @@
+
 const Table = ({
   columns,
   renderRow,

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -13,7 +14,7 @@ const TableSearch = () => {
 
     const params = new URLSearchParams(window.location.search);
     params.set("search", value);
-    router.push(`${window.location.pathname}?${params.toString()}`);
+    router.push(`${window.location.pathname}?${params}`);
   };
 
   return (
